@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Recipient__c</fullName>
+    <deleteConstraint>Restrict</deleteConstraint>
+    <description>Details of the party receiving the parcel.</description>
+    <label>Recipient/Consignee</label>
+    <referenceTo>Contact</referenceTo>
+    <relationshipLabel>Shipments</relationshipLabel>
+    <relationshipName>Shipments</relationshipName>
+    <required>true</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

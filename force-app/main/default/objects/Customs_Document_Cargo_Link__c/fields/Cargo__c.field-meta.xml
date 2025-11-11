@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Cargo__c</fullName>
+    <label>Cargo</label>
+    <referenceTo>Cargo__c</referenceTo>
+    <relationshipLabel>Customs Document Cargo Links</relationshipLabel>
+    <relationshipName>Customs_Document_Cargo_Links</relationshipName>
+    <relationshipOrder>1</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

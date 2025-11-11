@@ -1,0 +1,35 @@
+<apex:page standardController="Shipment__c" extensions="FuelCostCalculator" sidebar="false" showHeader="true" standardStylesheets="false" lightningStylesheets="true">
+    <apex:pageBlock title="Shipment Summary">
+    	<apex:pageBlockSection >
+            <apex:pageBlockTable value="{!shipmentList}" var="Sh">
+                <apex:column headerValue="Shipping Number">
+                	<apex:outputText value="{!Sh.shipment.Name}"></apex:outputText>
+                </apex:column>
+                <apex:column headerValue="Shipping Method">
+                	<apex:outputText value="{!Sh.shipment.Shipping_Method__c}"></apex:outputText>
+                </apex:column>
+                <apex:column headerValue="Total Weight">
+                	<apex:outputText value="{!Sh.shipment.Total_Weight__c}"></apex:outputText>
+                </apex:column>
+                <apex:column headerValue="Distance">
+                	<apex:outputText value="{!Sh.shipment.Estimated_Direct_Distance__c}"></apex:outputText>
+                </apex:column>
+                <apex:column headerValue="Total Delivery Time">
+                	<apex:outputText value="{!Sh.shipment.Total_Delivery_Time__c}"></apex:outputText>
+                </apex:column>
+                <apex:column headerValue="Calculated Shipping Cost">
+                    <apex:outputText value="{!Sh.FuelCost}"/>
+                </apex:column>
+                <apex:column headerValue="Sender">
+                	<apex:outputText value="{!Sh.shipment.Sender__r.Name}"></apex:outputText>
+                </apex:column>
+                <apex:column headerValue="Recipient">
+                	<apex:outputText value="{!Sh.shipment.Recipient__r.Name}"></apex:outputText>
+                </apex:column>
+                <apex:column headerValue="Owner">
+                	<apex:outputText value="{!Sh.shipment.Owner.Name}"></apex:outputText>
+                </apex:column>
+            </apex:pageBlockTable>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+</apex:page>

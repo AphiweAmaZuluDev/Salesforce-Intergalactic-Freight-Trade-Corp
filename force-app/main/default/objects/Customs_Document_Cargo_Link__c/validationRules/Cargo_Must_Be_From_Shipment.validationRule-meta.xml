@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Cargo_Must_Be_From_Shipment</fullName>
+    <active>true</active>
+    <description>The Cargo record that the user is adding to the Customs Document should be related to the shipment in the Shipment field of the Customs Document.</description>
+    <errorConditionFormula>NOT(Customs_Document__r.Shipment__r.Id = Cargo__r.Shipment__r.Id)</errorConditionFormula>
+    <errorMessage>The selected Cargo must belong to the Shipment linked to this Customs Document.</errorMessage>
+</ValidationRule>

@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <description>Sends custom notification to the Freight Agent that owns the delayed shipment record.</description>
+        <name>Notify_Agent_of_Delayed_Shipment</name>
+        <label>Notify Agent of Delayed Shipment</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <actionName>customNotificationAction</actionName>
+        <actionType>customNotificationAction</actionType>
+        <connector>
+            <targetReference>Update_Status_to_Delayed</targetReference>
+        </connector>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>customNotifTypeId</name>
+            <value>
+                <stringValue>Shipment_Delayed</stringValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>recipientIds</name>
+            <value>
+                <elementReference>varFreightAgentID</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>title</name>
+            <value>
+                <stringValue>Urgent! Shipment delayed.</stringValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>body</name>
+            <value>
+                <stringValue>Hi {!$Record.Owner:User.FirstName}. Shipment {!$Record.Name} has not been delivered and it is past its ETA!</stringValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>targetId</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputParameters>
+        <nameSegment>customNotificationAction</nameSegment>
+        <offset>0</offset>
+    </actionCalls>
+    <actionCalls>
+        <description>Sends custom notification to Operations Managers to inform them of the shipment being delayed.</description>
+        <name>Notify_Opps_Managers_of_Delayed_Shipment</name>
+        <label>Notify Opps Managers of Delayed Shipment</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <actionName>customNotificationAction</actionName>
+        <actionType>customNotificationAction</actionType>
+        <connector>
+            <targetReference>Assign_Freight_Agent_ID_to_Text_Variable</targetReference>
+        </connector>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>customNotifTypeId</name>
+            <value>
+                <stringValue>Shipment_Delayed</stringValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>recipientIds</name>
+            <value>
+                <elementReference>varOperationsManagerIDs</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>title</name>
+            <value>
+                <stringValue>Shipment Delayed</stringValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>body</name>
+            <value>
+                <stringValue>Shipment {!$Record.Name} assigned to {!$Record.Owner:User.FirstName} {!$Record.Owner:User.LastName} is Delayed. Kindly inform the parcel&apos;s recipient.</stringValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>targetId</name>
+            <value>
+                <elementReference>$Record.OwnerId</elementReference>
+            </value>
+        </inputParameters>
+        <nameSegment>customNotificationAction</nameSegment>
+        <offset>0</offset>
+    </actionCalls>
+    <apiVersion>65.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <assignments>
+        <description>Adds the User IDs for the Operations Manager User to the Collections variable so that they are stored in text format.</description>
+        <name>Add_User_ID_to_Collection</name>
+        <label>Add User ID to Collection</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>varOperationsManagerIDs</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>Loop_Through_Opps_Manager_IDs.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Loop_Through_Opps_Manager_IDs</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <description>Assigns the User ID of the shipment owner (Freight Agent) to the varFreightAgentOwnerID so that it is stored in text format.</description>
+        <name>Assign_Freight_Agent_ID_to_Text_Variable</name>
+        <label>Assign Freight Agent ID to Text Variable</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>varFreightAgentID</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>varFreightAgentID</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Notify_Agent_of_Delayed_Shipment</targetReference>
+        </connector>
+    </assignments>
+    <decisions>
+        <description>Checks whether the shipment has been delivered and if it hasn&apos;t, whether it is past the ETA date.</description>
+        <name>Is_Shipment_Still_Open_and_Past_Due</name>
+        <label>Is Shipment Still Open and Past Due?</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Delayed_Send_Notification</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.ETA__c</leftValueReference>
+                <operator>GreaterThan</operator>
+                <rightValue>
+                    <elementReference>$Flow.CurrentDate</elementReference>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Status__c</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <stringValue>Delivered</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Get_Operations_Manager_Profile</targetReference>
+            </connector>
+            <label>Delayed - Send Notification</label>
+        </rules>
+    </decisions>
+    <description>Notifies the Freight Agent who owns the shipment and the Operations Managers that the shipment has been delayed.</description>
+    <environments>Default</environments>
+    <interviewLabel>Notify of Delayed Shipment {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Notify of Delayed Shipment</label>
+    <loops>
+        <description>Iterates over all the Operations Manager Users retrieved by the Get Operations Managers Object.</description>
+        <name>Loop_Through_Opps_Manager_IDs</name>
+        <label>Loop Through Opps Manager IDs</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <collectionReference>Get_Operations_Managers</collectionReference>
+        <iterationOrder>Asc</iterationOrder>
+        <nextValueConnector>
+            <targetReference>Add_User_ID_to_Collection</targetReference>
+        </nextValueConnector>
+        <noMoreValuesConnector>
+            <targetReference>Notify_Opps_Managers_of_Delayed_Shipment</targetReference>
+        </noMoreValuesConnector>
+    </loops>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordLookups>
+        <name>Get_Operations_Manager_Profile</name>
+        <label>Get Operations Manager Profile</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Get_Operations_Managers</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Name</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Operations Manager Profile</stringValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Profile</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <name>Get_Operations_Managers</name>
+        <label>Get Operations Managers</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Loop_Through_Opps_Manager_IDs</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>ProfileId</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>Get_Operations_Manager_Profile.Id</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>false</getFirstRecordOnly>
+        <object>User</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordUpdates>
+        <description>Updates the status field of the shipment to &quot;Delayed&quot;</description>
+        <name>Update_Status_to_Delayed</name>
+        <label>Update Status to Delayed</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <inputAssignments>
+            <field>Status__c</field>
+            <value>
+                <stringValue>Delayed</stringValue>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>ETA__c</field>
+            <operator>IsNull</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </filters>
+        <object>Shipment__c</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <scheduledPaths>
+            <name>Check_For_Delay</name>
+            <connector>
+                <targetReference>Is_Shipment_Still_Open_and_Past_Due</targetReference>
+            </connector>
+            <label>Check For Delay</label>
+            <offsetNumber>0</offsetNumber>
+            <offsetUnit>Hours</offsetUnit>
+            <recordField>ETA__c</recordField>
+            <timeSource>RecordField</timeSource>
+        </scheduledPaths>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+    <variables>
+        <name>varFreightAgentID</name>
+        <dataType>String</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <description>A variable which stores a collection of the IDs of all the users who&apos;s profile is Operations Manager Profile in text format.</description>
+        <name>varOperationsManagerIDs</name>
+        <dataType>String</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+</Flow>

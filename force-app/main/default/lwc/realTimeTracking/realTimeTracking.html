@@ -1,0 +1,38 @@
+<template>
+    <lightning-card title="Real-Time Shipment Tracker" icon-name="custom:custom90">
+        <div class="slds-p-around_medium">
+            <template if:true={error}>
+                <p class="error-message">
+                    Error retrieving data: {error}
+                </p>
+            </template>
+            <template if:true={shipmentIdentifier}>
+                <p class="slds-text-heading_small slds-m-bottom_small">
+                    Shipment ID: <b>{shipmentIdentifier}</b>
+                </p>
+                <div class="slds-grid slds-wrap slds-m-bottom_x-small">
+                    <div class="slds-col slds-size_1-of-2">
+                        <p>
+                            Dispatch: <b>{dispatchDateDisplay}</b>
+                        </p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-text-align_right">
+                        <p>
+                            ETA: <b>{EtaDateDisplay}</b>
+                        </p>
+                    </div>
+                </div>
+
+                <lightning-progress-bar value={progressValue} size="large"></lightning-progress-bar>
+                <p class="slds-text-align_center slds-m-top_small">
+                    **{progressValue}%** complete - **{statusText}**
+                </p>
+            </template>
+            <template if:false={shipmentIdentifier}>
+                <p>
+                    Please enter a Shipment ID to track.
+                </p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <description>Calculate The Fuel Cost by calling an apex class.</description>
+        <name>Calculate_Fuel_Cost</name>
+        <label>Calculate Fuel Cost</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <actionName>FuelCostFlowAction</actionName>
+        <actionType>apex</actionType>
+        <connector>
+            <targetReference>Update_Fuel_Cost_Field</targetReference>
+        </connector>
+        <flowTransactionModel>Automatic</flowTransactionModel>
+        <inputParameters>
+            <name>shipmentId</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputParameters>
+        <nameSegment>FuelCostFlowAction</nameSegment>
+        <offset>0</offset>
+        <outputParameters>
+            <assignToReference>fuelCostResult</assignToReference>
+            <name>calculatedCost</name>
+        </outputParameters>
+    </actionCalls>
+    <apiVersion>65.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <description>Auto-populates the fuel cost field upon shipment record creation or update</description>
+    <environments>Default</environments>
+    <interviewLabel>Calculate Fuel Cost {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Calculate Fuel Cost</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordUpdates>
+        <description>Updates the value of the fuel cost field with the result.</description>
+        <name>Update_Fuel_Cost_Field</name>
+        <label>Update Fuel Cost Field</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <inputAssignments>
+            <field>Fuel_Cost__c</field>
+            <value>
+                <elementReference>fuelCostResult</elementReference>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Calculate_Fuel_Cost</targetReference>
+        </connector>
+        <object>Shipment__c</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+    <variables>
+        <description>Stores the calculated fuel cost</description>
+        <name>fuelCostResult</name>
+        <dataType>Currency</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <scale>2</scale>
+        <value>
+            <numberValue>0.0</numberValue>
+        </value>
+    </variables>
+</Flow>

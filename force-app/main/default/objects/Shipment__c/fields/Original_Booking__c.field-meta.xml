@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Original_Booking__c</fullName>
+    <deleteConstraint>Restrict</deleteConstraint>
+    <description>Details of the original booking for the shipment.</description>
+    <label>Original Booking</label>
+    <referenceTo>Opportunity</referenceTo>
+    <relationshipLabel>Shipments</relationshipLabel>
+    <relationshipName>Shipments</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

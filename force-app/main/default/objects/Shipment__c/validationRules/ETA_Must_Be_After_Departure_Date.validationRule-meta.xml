@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ETA_Must_Be_After_Departure_Date</fullName>
+    <active>true</active>
+    <description>Ensures that the ETA is after the Departure date for the shipment.</description>
+    <errorConditionFormula>ETA__c &lt;  Departure_Date__c</errorConditionFormula>
+    <errorDisplayField>ETA__c</errorDisplayField>
+    <errorMessage>ETA must be after the departure date.</errorMessage>
+</ValidationRule>

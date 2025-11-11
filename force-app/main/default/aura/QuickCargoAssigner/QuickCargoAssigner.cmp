@@ -1,0 +1,45 @@
+<aura:component controller="QuickCargoAssignerController" implements="flexipage:availableForAllPageTypes,force:LightningQuickAction" access="global">
+    <aura:attribute name="cargoOptions" type="List" description="List of available cargo for the dual list box"/>
+    <aura:attribute name="agentOptions" type="List" description="List of available agents for the dropdown."/>
+    
+    <aura:attribute name="selectedCargoIds" type="List" description="List of Cargo IDs selected by the user"/>
+    <aura:attribute name="selectedAgentId" type="Id" description="The Agent ID selected by the user"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <lightning:card title="Quick Cargo Assigner" iconName="standard:logistics">
+        <div class="slds-p-around_medium">
+            <lightning:dualListbox name="cargoSelector"
+                label="Select Cargo"
+                sourceLabel="Available"
+                selectedLabel="Selected"
+                options="{!v.cargoOptions}"
+                value="{!v.selectedCargoIds}"
+                required="true"
+            />
+
+            <br/>
+
+            <lightning:select
+                name="agentSelector"
+                label="Assign to Agent"
+                value="{!v.selectedAgentId}"
+                required="true">
+
+                <option value="">-- Select an Agent --</option>
+                <aura:iteration items="{!v.agentOptions}" var="agent">
+                    <option value="{!agent.value}">{!agent.label}</option>
+                </aura:iteration>
+            </lightning:select>  
+
+            <br/>
+
+            <lightning:button 
+                label="Assign Cargo"
+                variant="brand"
+                onclick="{!c.handleAssign}"
+                class="slds-m-top_medium"
+            />
+        </div>
+    </lightning:card>
+</aura:component>

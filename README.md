@@ -1,278 +1,333 @@
-# Intergalactic Freight & Trade Corp — Technical Documentation
+# **Intergalactic Freight & Trade Corp — Technical Documentation**
 
 This documentation is generated from the live org (aphiwe.zulu852@agentforce.com) and aligned with the source in this repository. It inventories the data model, automation (flows, triggers), Apex code, UI components, and operational practices.
 
-Last updated: 2025-11-11
+Last updated: 2025-11-11  
 Org: aphiwe.zulu852@agentforce.com (API v65.0)
 
-Contents
-- Overview
-- Architecture
-- Data Model
-- Automation (Flows, Triggers, Validation Rules)
-- Apex
-- UI (LWC, Aura, Visualforce, Apps/Pages)
-- Integrations and Data Cloud Streams
-- Security and Access
-- Operations (Deploy, Test, Troubleshoot)
-- Appendix (List Views, Web Links, Known Gaps)
+## **Contents**
 
-Overview
+* [Sandbox Access & Test Users](https://www.google.com/search?q=%23sandbox-access--test-users)  
+* [Overview](https://www.google.com/search?q=%23overview)  
+* [Architecture](https://www.google.com/search?q=%23architecture)  
+* [Data Model](https://www.google.com/search?q=%23data-model)  
+* [Automation (Flows, Triggers, Validation Rules)](https://www.google.com/search?q=%23automation)  
+* [Apex](https://www.google.com/search?q=%23apex)  
+* [UI (LWC, Aura, Visualforce, Apps/Pages)](https://www.google.com/search?q=%23ui)  
+* [Integrations and Data Cloud Streams](https://www.google.com/search?q=%23integrations-and-data-cloud-streams)  
+* [Security and Access](https://www.google.com/search?q=%23security-and-access)  
+* [Operations (Deploy, Test, Troubleshoot)](https://www.google.com/search?q=%23operations)  
+* [Appendix (List Views, Web Links, Known Gaps)](https://www.google.com/search?q=%23appendix)  
+* [Change Log](https://www.google.com/search?q=%23change-log)
+
+## **Sandbox Access & Test Users**
+
+Login to the development/demo org using the credentials below.
+
+**Login URL:** https://orgfarm-f26eb6866c-dev-ed.develop.my.salesforce.com/
+
+### **Test User Credentials**
+
+* **Role:** Operations Manager  
+* **Username:** operationsmanager1@testuser.com  
+* **Password:** eCYwz2PsJg6KR6i  
+* **Role:** Freight Agent  
+* **Username:** freightagent1@testuser.com  
+* **Password:** 34Wb7VEwuQiSbUt
+
+## **Overview**
+
 Intergalactic Freight & Trade Corp manages shipments across planetary systems. This Salesforce package provides:
-- Shipment planning and execution
-- Cargo assignment to available freight agents
-- Automated fuel cost calculation and ETA management
-- Customs documentation generation and linkage
-- Real-time shipment tracking UI components
-- Event ingestion (Data Cloud streams) for route metrics
 
-Architecture
-- Core objects: Shipment__c, Cargo__c, Customs_Document__c, Customs_Document_Cargo_Link__c
-- Relationships:
-  - Cargo__c.Shipment__c (lookup to Shipment)
-  - Shipment__c.Recipient__c and Shipment__c.Sender__c (lookups to Contact)
-  - Customs_Document__c.Shipment__c and Customs_Document__c.Cargo__c
-  - Customs_Document_Cargo_Link__c bridges Customs_Document__c and Cargo__c (enforces same-shipment validation)
-- Automation:
-  - Flows: Assign agent, calculate fuel, set/clear delivered date, delayed shipment notification, route metrics subscriber
-  - Triggers: Shipment management, cargo bulk processing, customs generators and link validation guard
-- Code:
-  - Service/logic classes: FuelCostCalculator, CustomsClearanceService, BulkShipmentProcessor, TriggerHandlerGuard
-  - Controllers: ShipmentTrackerController (LWC), QuickCargoAssignerController (Aura), FuelCostFlowAction (invocable)
-- UI:
-  - LWC realTimeTracking
-  - Aura QuickCargoAssigner
-  - Visualforce ShipmentSummaryPage
-- Streaming/Data Cloud:
-  - DataStreamDefinitions for Shipment, Shipping Route, Route Legs and Planetary Systems
+* Shipment planning and execution  
+* Cargo assignment to available freight agents  
+* Automated fuel cost calculation and ETA management  
+* Customs documentation generation and linkage  
+* Real-time shipment tracking UI components  
+* Event ingestion (Data Cloud streams) for route metrics
 
-Data Model
+## **Architecture**
 
-Shipment__c
-- Key fields:
-  - Departure_Date__c (Date)
-  - ETA__c (Date/Time) [VR: must be after departure]
-  - Origin_Planetary_System__c, Destination_Planetary_System__c (Lookup/Text)
-  - Fuel_Cost__c (Currency) [set by FuelCostCalculator/Flow]
-  - Total_Weight__c (Number) [rollup/summarized from Cargo]
-  - Is_Delayed__c (Checkbox) [set by Check_for_Delays Flow]
-  - Total_Delivery_Time__c (Number)
-  - Delay_Likelihood_Score_Data_Cloud__c (Number) [from Data Cloud]
-  - Recipient__c, Sender__c (Lookup(Contact))
-  - Status__c, Shipping_Method__c (Picklists)
-  - Suggested_Shipping_Route__c, Estimated_Direct_Distance__c
-  - Date_Delivered__c (Date) [managed by Set/Remove Date Delivered Flows]
-- Validation Rules:
-  - ETA_Must_Be_After_Departure_Date
-  - Total_Cargo_Weight_Within_Ship_Capacity (see VRs)
-- List Views: All
+* **Core objects:** Shipment\_\_c, Cargo\_\_c, Customs\_Document\_\_c, Customs\_Document\_Cargo\_Link\_\_c  
+* **Relationships:**  
+  * Cargo\_\_c.Shipment\_\_c (lookup to Shipment)  
+  * Shipment\_\_c.Recipient\_\_c and Shipment\_\_c.Sender\_\_c (lookups to Contact)  
+  * Customs\_Document\_\_c.Shipment\_\_c and Customs\_Document\_\_c.Cargo\_\_c  
+  * Customs\_Document\_Cargo\_Link\_\_c bridges Customs\_Document\_\_c and Cargo\_\_c (enforces same-shipment validation)  
+* **Automation:**  
+  * Flows: Assign agent, calculate fuel, set/clear delivered date, delayed shipment notification, route metrics subscriber  
+  * Triggers: Shipment management, cargo bulk processing, customs generators and link validation guard  
+* **Code:**  
+  * Service/logic classes: FuelCostCalculator, CustomsClearanceService, BulkShipmentProcessor, TriggerHandlerGuard  
+  * Controllers: ShipmentTrackerController (LWC), QuickCargoAssignerController (Aura), FuelCostFlowAction (invocable)  
+* **UI:**  
+  * LWC realTimeTracking  
+  * Aura QuickCargoAssigner  
+  * Visualforce ShipmentSummaryPage  
+* **Streaming/Data Cloud:**  
+  * DataStreamDefinitions for Shipment, Shipping Route, Route Legs and Planetary Systems
 
-Cargo__c
-- Fields:
-  - Shipment__c (Lookup Shipment__c)
-  - Agent__c (Lookup/User or custom agent)
-  - Weight__c (Number)
-  - Category__c (Picklist)
-  - Description__c (Text)
-- List Views: All
+## **Data Model**
 
-Customs_Document__c
-- Fields:
-  - Shipment__c (Lookup)
-  - Cargo__c (Lookup)
-  - Clearance_Status__c (Picklist: e.g., Submitted/Approved/Rejected)
-  - Date_Submitted__c (Date)
-  - Rejection_Reason__c (Text)
-- List Views: All
+### **Shipment\_\_c**
 
-Customs_Document_Cargo_Link__c
-- Junction between Customs_Document__c and Cargo__c
-- Validation:
-  - Cargo_Must_Be_From_Shipment (cargo must belong to the same shipment as the customs doc)
-- List Views: All
+* **Key fields:**  
+  * Departure\_Date\_\_c (Date)  
+  * ETA\_\_c (Date/Time) \[VR: must be after departure\]  
+  * Origin\_Planetary\_System\_\_c, Destination\_Planetary\_System\_\_c (Lookup/Text)  
+  * Fuel\_Cost\_\_c (Currency) \[set by FuelCostCalculator/Flow\]  
+  * Total\_Weight\_\_c (Number) \[rollup/summarized from Cargo\]  
+  * Is\_Delayed\_\_c (Checkbox) \[set by Check\_for\_Delays Flow\]  
+  * Total\_Delivery\_Time\_\_c (Number)  
+  * Delay\_Likelihood\_Score\_Data\_Cloud\_\_c (Number) \[from Data Cloud\]  
+  * Recipient\_\_c, Sender\_\_c (Lookup(Contact))  
+  * Status\_\_c, Shipping\_Method\_\_c (Picklists)  
+  * Suggested\_Shipping\_Route\_\_c, Estimated\_Direct\_Distance\_\_c  
+  * Date\_Delivered\_\_c (Date) \[managed by Set/Remove Date Delivered Flows\]  
+* **Validation Rules:**  
+  * ETA\_Must\_Be\_After\_Departure\_Date  
+  * Total\_Cargo\_Weight\_Within\_Ship\_Capacity (see VRs)  
+* **List Views:** All
 
-Standard Objects in scope
-- Account, Contact, Opportunity typical fields and customizations (examples):
-  - Account: SLA__c, SLAExpirationDate__c, SLASerialNumber__c, Active__c, NumberofLocations__c
-  - Opportunity: TrackingNumber__c, DeliveryStatus (WebLink), standard sales fields
-  - Contact: various test fields (rh2__*) and demographics
+### **Cargo\_\_c**
 
-Automation
+* **Fields:**  
+  * Shipment\_\_c (Lookup Shipment\_\_c)  
+  * Agent\_\_c (Lookup/User or custom agent)  
+  * Weight\_\_c (Number)  
+  * Category\_\_c (Picklist)  
+  * Description\_\_c (Text)  
+* **List Views:** All
 
-Flows (force-app/main/default/flows)
-- Assign_Shipment_to_Available_Freight_Agent
-  - Purpose: On creation/update, assign a shipment to an available agent
-  - Notes: Can lock User records during tests; test failures show UNABLE_TO_LOCK_ROW in concurrent updates
-- Calculate_Fuel_Cost
-  - Purpose: Compute Fuel_Cost__c for Shipment using FuelCostCalculator
-  - Entry: Autolaunched/from invocable
-- Check_for_Delays
-  - Purpose: Derive Is_Delayed__c based on ETA, route metrics, and events
-- Notify_of_Delayed_Shipment
-  - Purpose: Notification if shipment delayed
-- Set_Date_Delivered
-  - Purpose: Set Date_Delivered__c when Status moves to Delivered
-- Remove_Date_Delivered_Value
-  - Purpose: Clear Date_Delivered__c when status changes away from Delivered
-- Route_Metrics_Event_Subscriber
-  - Purpose: Subscribe/process Data Cloud route metrics, update shipments
+### **Customs\_Document\_\_c**
 
-Apex Triggers (force-app/main/default/triggers)
-- ShipmentManagementTrigger (Shipment__c)
-  - Enforces lifecycle rules (delete allowed only in certain statuses)
-  - Uses TriggerHandlerGuard to avoid recursion/bulk issues
-- CargoBulkProcessingTrigger (Cargo__c)
-  - Handles bulk insert/update weight rollups and assignment logic
-- CustomsDocumentGenerator (Customs_Document__c)
-  - Generates/updates customs docs upon cargo/shipment associations
-- CustomsDocumentCargoLinkTrigger (Customs_Document_Cargo_Link__c)
-  - Enforces junction constraints, prevents cross-shipment linking
+* **Fields:**  
+  * Shipment\_\_c (Lookup)  
+  * Cargo\_\_c (Lookup)  
+  * Clearance\_Status\_\_c (Picklist: e.g., Submitted/Approved/Rejected)  
+  * Date\_Submitted\_\_c (Date)  
+  * Rejection\_Reason\_\_c (Text)  
+* **List Views:** All
 
-Validation Rules
-- Shipment__c:
-  - ETA_Must_Be_After_Departure_Date
-  - Total_Cargo_Weight_Within_Ship_Capacity
-- Customs_Document_Cargo_Link__c:
-  - Cargo_Must_Be_From_Shipment
+### **Customs\_Document\_Cargo\_Link\_\_c**
 
-Apex
+* **Junction:** between Customs\_Document\_\_c and Cargo\_\_c  
+* **Validation:**  
+  * Cargo\_Must\_Be\_From\_Shipment (cargo must belong to the same shipment as the customs doc)  
+* **List Views:** All
 
-Service and Utility Classes
-- FuelCostCalculator
-  - Calculates fuel cost based on distance, weight and method
-  - Tested to 100% coverage in current run
-- FuelCostFlowAction
-  - Invocable wrapper for Flow integration
-- CustomsClearanceService
-  - Evaluates hazardous/mixed cargo and sets clearance outcomes
-  - 100% coverage
-- BulkShipmentProcessor
-  - Bulk operations over shipments; 94% coverage
-- TriggerHandlerGuard
-  - Guard to ensure single execution per context and bulk-safe processing
+### **Standard Objects in scope**
 
-Controllers
-- ShipmentTrackerController
-  - Apex controller to provide real-time tracking data to LWC
-  - 88% coverage; lines 36–37 uncovered in latest run
-- QuickCargoAssignerController
-  - Aura controller for assigning agents to cargo; 73% coverage
+* **Account:** SLA\_\_c, SLAExpirationDate\_\_c, SLASerialNumber\_\_c, Active\_\_c, NumberofLocations\_\_c  
+* **Opportunity:** TrackingNumber\_\_c, DeliveryStatus (WebLink), standard sales fields  
+* **Contact:** various test fields (rh2\_\_\*) and demographics
 
-Tests and Coverage (latest run)
-- Tests ran: 33, Pass rate: 85%, Org-wide Coverage: 92%
-- Failing tests:
-  - CustomsDocumentGenerator_Test.testTriggerOnBulkInsert due to flow lock row on assigning agent
-  - CargoBulkProcessingTrigger_Test.setup due to same locking issue in flow
-  - FuelCostCalculator_Test.testConstructorLogic assertion issue
-- Key coverages:
-  - 100%: FuelCostCalculator, CustomsDocumentCargoLinkTrigger, CustomsClearanceService, ShipmentManagementTrigger, TriggerHandlerGuard, FuelCostFlowAction
-  - 89%: CustomsDocumentGenerator
-  - 94%: BulkShipmentProcessor
-  - 88%: ShipmentTrackerController
-  - 73%: QuickCargoAssignerController
+## **Automation**
 
-UI
+### **Flows (force-app/main/default/flows)**
 
-LWC
-- realTimeTracking
-  - Files: realTimeTracking.html, realTimeTracking.js, meta.xml
-  - Purpose: Displays shipment tracking data in real-time
-  - Backed by ShipmentTrackerController
+* **Assign\_Shipment\_to\_Available\_Freight\_Agent**  
+  * **Purpose:** On creation/update, assign a shipment to an available agent.  
+  * **Notes:** Can lock User records during tests; test failures show UNABLE\_TO\_LOCK\_ROW in concurrent updates.  
+* **Calculate\_Fuel\_Cost**  
+  * **Purpose:** Compute Fuel\_Cost\_\_c for Shipment using FuelCostCalculator.  
+  * **Entry:** Autolaunched/from invocable.  
+* **Check\_for\_Delays**  
+  * **Purpose:** Derive Is\_Delayed\_\_c based on ETA, route metrics, and events.  
+* **Notify\_of\_Delayed\_Shipment**  
+  * **Purpose:** Notification if shipment delayed.  
+* **Set\_Date\_Delivered**  
+  * **Purpose:** Set Date\_Delivered\_\_c when Status moves to 'Delivered'.  
+* **Remove\_Date\_Delivered\_Value**  
+  * **Purpose:** Clear Date\_Delivered\_\_c when status changes away from 'Delivered'.  
+* **Route\_Metrics\_Event\_Subscriber**  
+  * **Purpose:** Subscribe/process Data Cloud route metrics, update shipments.
 
-Aura
-- QuickCargoAssigner
-  - Component, controller, helper, renderer, design, doc
-  - Purpose: Quickly assign agents to cargo, bulk-friendly UI
-  - Backing Apex: QuickCargoAssignerController
+### **Apex Triggers (force-app/main/default/triggers)**
 
-Visualforce
-- ShipmentSummaryPage
-  - Summary page for shipment data, links to related cargo and documents
+* **ShipmentManagementTrigger** (Shipment\_\_c)  
+  * **Purpose:** Enforces lifecycle rules (delete allowed only in certain statuses).  
+  * **Notes:** Uses TriggerHandlerGuard to avoid recursion/bulk issues.  
+* **CargoBulkProcessingTrigger** (Cargo\_\_c)  
+  * **Purpose:** Handles bulk insert/update weight rollups and assignment logic.  
+* **CustomsDocumentGenerator** (Customs\_Document\_\_c)  
+  * **Purpose:** Generates/updates customs docs upon cargo/shipment associations.  
+* **CustomsDocumentCargoLinkTrigger** (Customs\_Document\_Cargo\_Link\_\_c)  
+  * **Purpose:** Enforces junction constraints, prevents cross-shipment linking.
 
-Apps/Pages
-- Lightning App(s) present; Flexipages included in repo (see force-app/main/default/flexipages/)
+### **Validation Rules**
 
-Integrations and Data Cloud Streams
-- DataStreamDefinitions:
-  - Planetary_System_c_Home
-  - Shipping_Route_c_Home
-  - Route_Leg_c_Home
-  - Route_RouteLeg_Junction_c_Home
-  - Shipment_c_Home
-- Purpose: Provide event data for route metrics and delay likelihood scoring. Flows subscribe via Route_Metrics_Event_Subscriber.
+* **Shipment\_\_c:**  
+  * ETA\_Must\_Be\_After\_Departure\_Date  
+  * Total\_Cargo\_Weight\_Within\_Ship\_Capacity  
+* **Customs\_Document\_Cargo\_Link\_\_c:**  
+  * Cargo\_Must\_Be\_From\_Shipment
 
-Security and Access
-- Permission Sets and Profiles: retrieved in org, ensure object/field access and tab visibility. Review force-app/main/default/permissionsets and profiles for detailed access matrices.
-- Tabs and Web Links:
-  - Account Billing web link
-  - Opportunity DeliveryStatus web link
-- Layouts: standard and custom layouts present under force-app/main/default/layouts
+## **Apex**
 
-Operations
+### **Service and Utility Classes**
 
-Local Setup
-- Prereqs: Node 18+, Salesforce CLI (sf), Git
-- Clone: git clone & npm install (if applicable for any tooling)
-- Auth: sf org login web --alias your-org
+* **FuelCostCalculator**  
+  * **Purpose:** Calculates fuel cost based on distance, weight and method.  
+  * **Coverage:** 100%  
+* **FuelCostFlowAction**  
+  * **Purpose:** Invocable wrapper for Flow integration.  
+  * **Coverage:** 100%  
+* **CustomsClearanceService**  
+  * **Purpose:** Evaluates hazardous/mixed cargo and sets clearance outcomes.  
+  * **Coverage:** 100%  
+* **BulkShipmentProcessor**  
+  * **Purpose:** Bulk operations over shipments.  
+  * **Coverage:** 94%  
+* **TriggerHandlerGuard**  
+  * **Purpose:** Guard to ensure single execution per context and bulk-safe processing.  
+  * **Coverage:** 100%
 
-Scratch Org (optional)
-- sf org create scratch --definition-file config/project-scratch-def.json --alias iftc-scratch --duration-days 7
-- sf project deploy start --target-org iftc-scratch
-- sf apex run test --target-org iftc-scratch --code-coverage --result-format human --wait 10
+### **Controllers**
 
-Retrieve/Deploy
-- Retrieve from default org:
-  - sf project retrieve start --source-dir force-app --wait 10
-- Deploy to target:
-  - sf project deploy start --target-org <alias> --source-dir force-app --test-level RunLocalTests
+* **ShipmentTrackerController**  
+  * **Purpose:** Apex controller to provide real-time tracking data to LWC.  
+  * **Coverage:** 88% (lines 36–37 uncovered in latest run)  
+* **QuickCargoAssignerController**  
+  * **Purpose:** Aura controller for assigning agents to cargo.  
+  * **Coverage:** 73%
 
-Run Tests
-- sf apex run test --code-coverage --result-format human --wait 10
-- Review coverage by class and org-wide coverage
+### **Tests and Coverage (latest run)**
 
-Troubleshooting
-- Flow locking during tests (UNABLE_TO_LOCK_ROW on Assign_Shipment_to_Available_Freight_Agent):
-  - Mitigate with Platform Cache or Test.sealAllData false patterns, or mock assignment logic
-  - Consider pausing flow in test context via Custom Setting/Metadata flag that tests set ON to bypass agent updates
-- Missing fields warnings on retrieve (Shipment__c.Distance__c, Shipment__c.Total_Cargo_Weight__c):
-  - Repo/package.xml may reference removed fields. Clean references or re-add fields if expected.
-- Coverage shortfalls:
-  - ShipmentTrackerController uncovered lines 36–37; add tests for those branches
-  - QuickCargoAssignerController at 73%; add negative path and exception handling tests
+* **Tests ran:** 33  
+* **Pass rate:** 85%  
+* **Org-wide Coverage:** 92%  
+* **Failing tests:**  
+  * CustomsDocumentGenerator\_Test.testTriggerOnBulkInsert (due to flow lock row on assigning agent)  
+  * CargoBulkProcessingTrigger\_Test.setup (due to same locking issue in flow)  
+  * FuelCostCalculator\_Test.testConstructorLogic (assertion issue)
 
-Appendix
+## **UI**
 
-List Views (selected)
-- Account: AllAccounts, MyAccounts, NewThisWeek, NewLastWeek, PlatinumandGoldSLACustomers
-- Contact: AllContacts, MyContacts, BirthdaysThisMonth, NewThisWeek, NewLastWeek, BulkMessageContacts
-- Opportunity: AllOpportunities, MyOpportunities, ClosingThisMonth/NextMonth, Default_Opportunity_Pipeline, Private, Won
-- Cargo__c: All
-- Customs_Document__c: All
-- Customs_Document_Cargo_Link__c: All
-- Shipment__c: All
+### **LWC**
 
-Validation Rules
-- Shipment__c
-  - ETA_Must_Be_After_Departure_Date
-  - Total_Cargo_Weight_Within_Ship_Capacity
-- Customs_Document_Cargo_Link__c
-  - Cargo_Must_Be_From_Shipment
+* **realTimeTracking**  
+  * **Files:** realTimeTracking.html, realTimeTracking.js, meta.xml  
+  * **Purpose:** Displays shipment tracking data in real-time.  
+  * **Backed by:** ShipmentTrackerController
 
-Web Links
-- Account: Billing
-- Opportunity: DeliveryStatus
+### **Aura**
 
-Repository Pointers
-- Apex: force-app/main/default/classes
-- Triggers: force-app/main/default/triggers
-- Flows: force-app/main/default/flows
-- LWC: force-app/main/default/lwc/realTimeTracking
-- Aura: force-app/main/default/aura/QuickCargoAssigner
-- Objects and fields: force-app/main/default/objects
-- Data Streams: force-app/main/default/dataStreamDefinitions
-- Visualforce: force-app/main/default/pages
+* **QuickCargoAssigner**  
+  * **Files:** Component, controller, helper, renderer, design, doc  
+  * **Purpose:** Quickly assign agents to cargo, bulk-friendly UI.  
+  * **Backed by:** QuickCargoAssignerController
 
-Change Log (latest org sync)
-- Multiple metadata items retrieved and refreshed on 2025-11-11
-- Org-wide coverage reported at 92%
-- See sf retrieve output table in terminal for exact changed components
+### **Visualforce**
+
+* **ShipmentSummaryPage**  
+  * **Purpose:** Summary page for shipment data, links to related cargo and documents.
+
+### **Apps/Pages**
+
+* Lightning App(s) present; Flexipages included in repo (see force-app/main/default/flexipages/)
+
+## **Integrations and Data Cloud Streams**
+
+* **DataStreamDefinitions:**  
+  * Planetary\_System\_c\_Home  
+  * Shipping\_Route\_c\_Home  
+  * Route\_Leg\_c\_Home  
+  * Route\_RouteLeg\_Junction\_c\_Home  
+  * Shipment\_c\_Home  
+* **Purpose:** Provide event data for route metrics and delay likelihood scoring. Flows subscribe via Route\_Metrics\_Event\_Subscriber.
+
+## **Security and Access**
+
+* **Permission Sets and Profiles:** Retrieved in org, ensure object/field access and tab visibility. Review force-app/main/default/permissionsets and profiles for detailed access matrices.  
+* **Tabs and Web Links:**  
+  * Account Billing web link  
+  * Opportunity DeliveryStatus web link  
+* **Layouts:** Standard and custom layouts present under force-app/main/default/layouts
+
+## **Operations**
+
+### **Local Setup**
+
+* **Prereqs:** Node 18+, Salesforce CLI (sf), Git  
+* **Clone:** git clone & npm install (if applicable for any tooling)  
+* **Auth:** sf org login web \--alias your-org
+
+### **Scratch Org (optional)**
+
+\# Create scratch org  
+sf org create scratch \--definition-file config/project-scratch-def.json \--alias iftc-scratch \--duration-days 7
+
+\# Deploy project  
+sf project deploy start \--target-org iftc-scratch
+
+\# Run tests  
+sf apex run test \--target-org iftc-scratch \--code-coverage \--result-format human \--wait 10
+
+### **Retrieve/Deploy**
+
+\# Retrieve from default org  
+sf project retrieve start \--source-dir force-app \--wait 10
+
+\# Deploy to target  
+sf project deploy start \--target-org \<alias\> \--source-dir force-app \--test-level RunLocalTests
+
+### **Run Tests**
+
+sf apex run test \--code-coverage \--result-format human \--wait 10
+
+* Review coverage by class and org-wide coverage.
+
+### **Troubleshooting**
+
+* **Flow locking during tests (UNABLE\_TO\_LOCK\_ROW on Assign\_Shipment\_to\_Available\_Freight\_Agent):**  
+  * **Mitigation:** Mitigate with Platform Cache or Test.sealAllData(false) patterns, or mock assignment logic.  
+  * **Bypass:** Consider pausing flow in test context via Custom Setting/Metadata flag that tests set ON to bypass agent updates.  
+* **Missing fields warnings on retrieve (Shipment\_\_c.Distance\_\_c, Shipment\_\_c.Total\_Cargo\_Weight\_\_c):**  
+  * **Cause:** Repo/package.xml may reference removed fields.  
+  * **Action:** Clean references or re-add fields if expected.  
+* **Coverage shortfalls:**  
+  * ShipmentTrackerController (88%): Add tests for uncovered lines 36–37.  
+  * QuickCargoAssignerController (73%): Add negative path and exception handling tests.
+
+## **Appendix**
+
+### **List Views (selected)**
+
+* **Account:** AllAccounts, MyAccounts, NewThisWeek, NewLastWeek, PlatinumandGoldSLACustomers  
+* **Contact:** AllContacts, MyContacts, BirthdaysThisMonth, NewThisWeek, NewLastWeek, BulkMessageContacts  
+* **Opportunity:** AllOpportunities, MyOpportunities, ClosingThisMonth/NextMonth, Default\_Opportunity\_Pipeline, Private, Won  
+* **Cargo\_\_c:** All  
+* **Customs\_Document\_\_c:** All  
+* **Customs\_Document\_Cargo\_Link\_\_c:** All  
+* **Shipment\_\_c:** All
+
+### **Validation Rules**
+
+* **Shipment\_\_c**  
+  * ETA\_Must\_Be\_After\_Departure\_Date  
+  * Total\_Cargo\_Weight\_Within\_Ship\_Capacity  
+* **Customs\_Document\_Cargo\_Link\_\_c**  
+  * Cargo\_Must\_Be\_From\_Shipment
+
+### **Web Links**
+
+* **Account:** Billing  
+* **Opportunity:** DeliveryStatus
+
+### **Repository Pointers**
+
+* **Apex:** force-app/main/default/classes  
+* **Triggers:** force-app/main/default/triggers  
+* **Flows:** force-app/main/default/flows  
+* **LWC:** force-app/main/default/lwc/realTimeTracking  
+* **Aura:** force-app/main/default/aura/QuickCargoAssigner  
+* **Objects:** force-app/main/default/objects  
+* **Data Streams:** force-app/main/default/dataStreamDefinitions  
+* **Visualforce:** force-app/main/default/pages
+
+## **Change Log (latest org sync)**
+
+* Multiple metadata items retrieved and refreshed on 2025-11-11  
+* Org-wide coverage reported at 92%  
+* See sf retrieve output table in terminal for exact changed components

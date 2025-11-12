@@ -23,6 +23,7 @@ Org: aphiwe.zulu852@agentforce.com (API v65.0)
 ## **Sandbox Access & Test Users**
 
 Login to the development/demo org using the credentials below.
+NB: Kindly Contact me on +27 83 409 7602 in order to access the org using any of the test users below (This is in order to complete 2FA as it is linked to my email).
 
 **Login URL:** https://orgfarm-f26eb6866c-dev-ed.develop.my.salesforce.com/
 
